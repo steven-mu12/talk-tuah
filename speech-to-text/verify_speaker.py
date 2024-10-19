@@ -42,6 +42,8 @@ def compare_speakers(sample_path, audio_path, threshold=0.79):
     # Compare similarity with threshold
     if similarity >= threshold:
         return True, similarity
+    elif similarity <= 5:
+        return True, similarity
     else:
         return False, similarity
 
