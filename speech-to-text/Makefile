@@ -1,4 +1,4 @@
-# Makefile for talk-tuah project
+# Makefile for speech to text
 
 # Python interpreter
 PYTHON = python3
@@ -8,7 +8,7 @@ SCRIPT = speech-to-text.py
 
 # Run the speech-to-text transcription
 transcribe:
-	$(PYTHON) $(SCRIPT)
+	./$(SCRIPT)
 
 # Make the script executable
 chmod:
