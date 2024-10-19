@@ -4,7 +4,7 @@ from deepgram import DeepgramClient, FileSource, PrerecordedOptions
 import json
 
 # Replace with your Deepgram API key
-DEEPGRAM_API_KEY = '49c5cc0aef710562a95e420038f2346acb934b39'
+DEEPGRAM_API_KEY = 'your-api-key'
 
 async def transcribe_audio():
     # Initialize the Deepgram client
