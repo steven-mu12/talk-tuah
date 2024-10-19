@@ -1,3 +1,5 @@
 firmware/build/
 *.mp3
 *.raw
+tmpdir
+.venv
