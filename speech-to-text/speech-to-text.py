@@ -20,18 +20,26 @@ async def transcribe_audio():
         options = PrerecordedOptions(
             smart_format=True,
             summarize="v2",
+            detect_topics=True,
+            sentiment=True
         )
         
         response = deepgram.listen.rest.v("1").transcribe_file(payload, options)
 
-        j = json.loads(response.to_json())
+        response_json = json.loads(response.to_json())
 
-        print("Transcription:")
-        print(j['results']['channels'][0]['alternatives'][0]['transcript'])
+        extracted_data = {
+            "transcript": response_json['results']['channels'][0]['alternatives'][0]['transcript'],
+            "sentiments": response_json['results']['sentiments']
+        }
+
+        # Write the extracted data to a JSON file
+        with open('./output/transcription_result.json', 'w') as json_file:
+            json.dump(extracted_data, json_file, indent=4)
 
         # Optionally, you can save the transcript to a file
-        with open('./output/transcript.txt', 'w') as f:
-            f.write(j['results']['channels'][0]['alternatives'][0]['transcript'])
+        #with open('./output/transcript.txt', 'w') as f:
+        #    f.write(j['results']['channels'][0]['alternatives'][0]['transcript'])
 
 # Run the async function
 asyncio.run(transcribe_audio())
