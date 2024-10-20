@@ -1,5 +1,6 @@
 import librosa
 import torch
+import sys
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from speechbrain.inference.classifiers import EncoderClassifier
@@ -45,16 +46,20 @@ def compare_speakers(sample_path, audio_path, threshold=0.79):
     else:
         return False, similarity
 
-def main():
+def speech_detect():
     sample_path = "../output/sample_audio.mp3"
     audio_path = "../output/audio.mp3"
     
     is_same_speaker, similarity = compare_speakers(sample_path, audio_path)
     
     if is_same_speaker:
-        print(f"The speakers are likely the same. Similarity: {similarity:.2f}")
+        print(f"[ SPEECH REC ]: The speakers are likely the same. Similarity: {similarity:.2f}")
+        sys.exit(1)
+    
     else:
-        print(f"The speakers are likely different. Similarity: {similarity:.2f}")
+        print(f"[ SPEECH REC ]: The speakers are likely different. Similarity: {similarity:.2f}")
+        sys.exit(0)
+
 
 if __name__ == "__main__":
-    main()
+    speech_detect()    

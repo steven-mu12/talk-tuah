@@ -3,3 +3,4 @@ firmware/build/
 *.raw
 .venv
 tmpdir
+venv

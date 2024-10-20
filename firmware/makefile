@@ -10,7 +10,6 @@ SRC = drivers/audio/capture.c
 
 # outputs
 OUT = build/capture
-
 # target
 all: $(OUT)
 
