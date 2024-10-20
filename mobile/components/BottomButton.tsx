@@ -1,16 +1,18 @@
 import { View, Text, StyleSheet } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'expo-router';
 
 type Props = {
   text: string;
   nav: string;
+  passing: Object;
 };
 
-export default function BottomButton({ text, nav }: Props) {
+
+export default function BottomButton({ text, nav, passing }: Props) {
   return (
     <View style={styles.container}>
-      <Link href={nav} style={styles.link}>
+      <Link href={nav} style={styles.link} params={{passing}}>
         <Text style={styles.text}>{text}</Text>
       </Link>
     </View>

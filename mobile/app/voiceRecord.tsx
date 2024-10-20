@@ -164,7 +164,9 @@ const voiceRecord = () => {
           </Text>
         </TouchableOpacity>
         {!isRecording && !firstRender &&
-          <BottomButton text={'Confirm Recording!'} nav={'/home'} />
+          <>
+            <BottomButton text={'Confirm Recording!'} nav={'/home'} passing={{uri: uri}}/>
+          </>
         }
       </View>
     </View>
