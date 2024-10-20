@@ -1,0 +1,19 @@
+{
+    "name": "chatbot",
+    "version": "1.0.0",
+    "description": "ChatGPT chatbot for CalHacks 11.0",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "author": "Alex Wang",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^1.7.7",
+        "colors": "^1.4.0",
+        "dotenv": "^16.4.5",
+        "openai": "^4.68.1",
+        "readline-sync": "^1.4.10"
+    }
+}
