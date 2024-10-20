@@ -25,7 +25,9 @@ typedef struct {
 volatile sig_atomic_t stop = 0;
 
 void handle_signal(int signal) {
-    stop = 1;
+    if (signal == SIGINT || signal == SIGTERM) {
+        stop = 1;
+    }
 }
 
 // writeCallback for raw audio
@@ -86,6 +88,8 @@ int main() {
     AudioData data;
     pthread_t encodingThread;
 
+    signal(SIGTERM, handle_signal);
+
     // raw data file
     data.rawFile = fopen(RAW_FILE_NAME, "wb");
     if (data.rawFile == NULL) {
@@ -136,12 +140,12 @@ int main() {
     pthread_create(&encodingThread, NULL, mp3EncodingThread, &data);
 
     printf("[ CAPTURE.C ]: LIVE RECORDING\n");
-    getchar(); // MANUAL TRIGGER (FOR TESTING)
+    // getchar(); // MANUAL TRIGGER (FOR TESTING)
 
-    // // wait for stop signal. Check this 10x a second
-    // while (!stop) {
-    //     usleep(100000);
-    // }
+    // wait for stop signal. Check this 10x a second
+    while (!stop) {
+        usleep(100000);
+    }
 
     // stop recording and encoding
     data.finished = 1;
@@ -155,5 +159,6 @@ int main() {
     lame_close(data.lame);
 
     printf("[ CAPTURE.C ]: RECORDING STOPPED \n");
+
     return 0;
 }
