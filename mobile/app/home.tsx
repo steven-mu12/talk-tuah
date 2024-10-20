@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, Image } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import BottomButton from '@/components/BottomButton';
 import ConvoBox from '@/components/ConvoBox';
 import { useLocalSearchParams } from 'expo-router';
+import { Link } from 'expo-router';
 
 const home = () => {
     const [uploadStatus, setUploadStatus] = useState('');
@@ -51,7 +52,15 @@ const home = () => {
     return (
         <View style={styles.container} >
             <View style={styles.topContainer}>
-                <Text style={styles.titleText}>Your Convos</Text>
+                <View style={styles.header}>
+                    <Text style={styles.titleText}>Your Convos</Text>
+                    <Link href="/settings">
+                        <Image
+                            source={require('../assets/images/memoji.png')} // Correct path to the image
+                            style={styles.image} // Style to control the size of the image
+                        />
+                    </Link>
+                </View>
             </View>
             <ScrollView style={styles.convosContainer}>
                 <View style={styles.convosContainer}>
@@ -64,7 +73,7 @@ const home = () => {
                     <ConvoBox />
                 </View>
             </ScrollView>
-            <BottomButton text={"New Convo +"} nav={"/voiceRecord"}/>
+            <BottomButton text={"New Convo +"} nav={"/emotions"} passing={{}}/>
         </View>
     )
 }
@@ -129,5 +138,15 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         gap: 24,
         paddingBottom: 20
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: "97%"
+    },
+    image:{
+        width: 48,
+        height: 48
     }
   });

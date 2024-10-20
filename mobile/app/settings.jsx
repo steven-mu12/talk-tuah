@@ -1,53 +1,36 @@
-import { StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Animated, Image } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { Audio } from 'expo-av';
 import BottomButton from '@/components/BottomButton';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useRouter } from 'expo-router';
 
-const voiceRecord = () => {
-    const scaleValue = useRef(new Animated.Value(1)).current; // Track selected emotion
-  useEffect(() => {
-    const startBreathing = () => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(scaleValue, {
-            toValue: 1.2,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleValue, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
+const settings = () => {
+    const router = useRouter();
+
+    const goToRoot = (): void => {
+        router.dismissAll()
     };
-
-    startBreathing();
-  }, []);
-
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
-        <Text style={styles.titleText}>Recording Conversation</Text>
-      </View>
-      <View style={styles.micContainer}>
-        <View style={styles.micCircle}>
-            <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
-              <FontAwesome name="microphone" size={80} color="#202020" />
-            </Animated.View>
+      <View style={styles.header}>
+            <Text style={styles.titleText}>Sign Out</Text>
+            <Image
+                source={require('../assets/images/memoji.png')} // Correct path to the image
+                style={styles.image} // Style to control the size of the image
+            />
         </View>
       </View>
       <View style={styles.botContainer}>
-        <BottomButton text={'End Conversation'} nav={'/home'}/>
+        <BottomButton text={'Sign Out'} nav={'/inputs'}/>
       </View>
     </View>
   );
 };
 
-export default voiceRecord;
+export default settings;
 
 const styles = StyleSheet.create({
   container: {
@@ -117,5 +100,15 @@ const styles = StyleSheet.create({
   topContainer: {
     flexDirection: "column",
     gap: 20
-  }
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: "97%"
+},
+    image:{
+        width: 48,
+        height: 48
+    }
 });
