@@ -1,0 +1,28 @@
+# Audio processing
+pyaudio
+pydub
+librosa
+
+# Speech recognition and processing
+webrtcvad
+speechbrain
+
+# Machine learning and data processing
+numpy
+scikit-learn
+torch
+
+# OpenAI API
+openai
+
+# Asynchronous programming
+asyncio
+
+# Deepgram API
+deepgram-sdk
+
+# Environment variables
+python-dotenv
+
+# Other utilities
+colors
