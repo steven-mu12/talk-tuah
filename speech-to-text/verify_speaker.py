@@ -17,7 +17,7 @@ def extract_features(audio_path):
     
     return mfccs_mean
 
-def compare_speakers(sample_path, audio_path, threshold=0.79):
+def compare_speakers(sample_path, audio_path, threshold=0.75):
     # Load pre-trained speaker embedding model
     speaker_encoder = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb")
     
@@ -42,6 +42,8 @@ def compare_speakers(sample_path, audio_path, threshold=0.79):
     
     # Compare similarity with threshold
     if similarity >= threshold:
+        return True, similarity
+    elif similarity <= 5:
         return True, similarity
     else:
         return False, similarity
