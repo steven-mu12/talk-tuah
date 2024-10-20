@@ -1,9 +1,0 @@
-{
-    "transcript": "Hi My name is Alex",
-    "sentiments": {
-        "average": {
-            "sentiment": "neutral",
-            "sentiment_score": 0.6
-        }
-    }
-}
