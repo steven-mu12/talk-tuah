@@ -2,7 +2,6 @@
 
 import openai from './config/openai.js';
 import colors from 'colors';
-import fs from 'fs';
 import path from 'path';
 import {
     appendFileSync,
@@ -12,11 +11,9 @@ import {
     mkdirSync,
 } from 'fs';
 
-// Configuration for Data Storage
 const LOG_DIRECTORY = './ConvoLogs'; // Directory for chat logs
 const DATA_DIRECTORY = './data'; // Directory for personal data
 const INPUT_JSON_FILE = './inputData/input.json'; // Path to the JSON file with the chatter's input
-const personalDataFilePath = path.join(DATA_DIRECTORY, 'personalData.json'); // Path to personal data JSON file
 let chatterName = 'Chatter'; // Default name
 let lastTranscript = ''; // To store the last processed transcript
 
@@ -36,28 +33,20 @@ const styleSettings = {
     }
 });
 
-// Initialize the personal data file if it doesn't exist
-if (!existsSync(personalDataFilePath)) {
-    writeFileSync(personalDataFilePath, '[]', { flag: 'w' });
-    console.log(colors.yellow('Initialized personalData.json'));
-}
-
-// Function to append the response to both .txt and .json files
-function appendToFile(responseText, currentName) {
-    const textFileName = 'message.txt'; // Static name for text log
+// Function to append both input and output to the JSON log
+function appendToFile(inputData, outputData) {
     const jsonFileName = 'message.json'; // Static name for JSON log
-
-    const textFilePath = path.join(LOG_DIRECTORY, textFileName);
     const jsonFilePath = path.join(LOG_DIRECTORY, jsonFileName);
 
-    // Append response to message.txt
-    appendFileSync(textFilePath, `${responseText}\n`, { flag: 'a' });
-
-    // Create a JSON object with the name and response
-    const logEntry = {
-        name: currentName,
-        message: responseText,
-        timestamp: new Date().toISOString()
+    // Create a log entry with 'in' and 'out' sections
+    const logEntry = { in: {
+            transcript: inputData.transcript,
+            timestamp: inputData.timestamp
+        },
+        out: {
+            transcript: outputData.transcript,
+            timestamp: outputData.timestamp
+        }
     };
 
     // Read the current contents of message.json (or initialize an empty array if file doesn't exist)
@@ -77,6 +66,13 @@ function appendToFile(responseText, currentName) {
     logData.push(logEntry);
 
     writeFileSync(jsonFilePath, JSON.stringify(logData, null, 2), { flag: 'w' });
+
+    // Continue appending only the output transcript to message.txt
+    const textFileName = 'message.txt'; // Static name for text log
+    const textFilePath = path.join(LOG_DIRECTORY, textFileName);
+
+    const textLogEntry = `${outputData.transcript}\n`;
+    appendFileSync(textFilePath, textLogEntry, { flag: 'a' });
 }
 
 // Function to determine or update the name of the chatter based on input
@@ -121,12 +117,13 @@ function readInputFromJson(jsonFilePath) {
             return null;
         }
 
-        // Extract the required fields: transcript, sentiment, sentiment_score
+        // Extract the required fields: transcript, sentiment, sentiment_score, timestamp (optional)
         const transcript = jsonData.transcript;
         const sentiment = jsonData.sentiments.average.sentiment;
         const sentimentScore = jsonData.sentiments.average.sentiment_score;
+        const timestamp = jsonData.timestamp || new Date().toISOString();
 
-        return { transcript, sentiment, sentimentScore };
+        return { transcript, sentiment, sentimentScore, timestamp };
     } catch (error) {
         console.error(colors.red('Error reading or parsing the input JSON file:'), error.message);
         return null;
@@ -194,65 +191,7 @@ async function extractPersonalData(inputText) {
     }
 }
 
-
-// Function to save personal data to a local JSON file without duplicates
-function savePersonalData(data) {
-    try {
-        // Read existing data
-        let existingData = [];
-        if (existsSync(personalDataFilePath)) {
-            const jsonData = readFileSync(personalDataFilePath, 'utf8');
-            if (jsonData) {
-                existingData = JSON.parse(jsonData);
-            }
-        }
-
-        // Filter out duplicates based on type and value
-        const newData = data.filter(newItem => {
-            return !existingData.some(existingItem =>
-                existingItem.type === newItem.type &&
-                existingItem.value.toLowerCase() === newItem.value.toLowerCase()
-            );
-        });
-
-        if (newData.length === 0) {
-            console.log('No new personal data to save.');
-            return;
-        }
-
-        // Append new data
-        existingData.push(...newData);
-
-        // Write back to the file
-        writeFileSync(personalDataFilePath, JSON.stringify(existingData, null, 2), { flag: 'w' });
-
-        console.log('Personal data saved successfully.');
-    } catch (error) {
-        console.error('Error saving personal data:', error.message);
-    }
-}
-
-// Function to load personal data from the local JSON file
-function loadPersonalData() {
-    try {
-        if (!existsSync(personalDataFilePath)) {
-            return [];
-        }
-
-        const jsonData = readFileSync(personalDataFilePath, 'utf8');
-        if (!jsonData) {
-            return [];
-        }
-
-        const data = JSON.parse(jsonData);
-        return data;
-    } catch (error) {
-        console.error('Error loading personal data:', error.message);
-        return [];
-    }
-}
-
-// Function to create the system prompt incorporating retrieved personal data
+// Function to create the system prompt
 function createSystemPrompt(styleSettings, mode, chatterName, personalData) {
     let personalDataNotes = '';
 
@@ -300,7 +239,7 @@ async function main() {
                 return;
             }
 
-            const { transcript, sentiment, sentimentScore } = inputData;
+            const { transcript, sentiment, sentimentScore, timestamp: inputTimestamp } = inputData;
 
             // Check if the transcript is different from the last processed one
             if (transcript === lastTranscript) {
@@ -326,15 +265,9 @@ async function main() {
 
             // Extract personal data from the user input
             const personalData = await extractPersonalData(transcript);
-            if (personalData.length > 0) {
-                savePersonalData(personalData);
-            }
 
-            // Load personal data to personalize the response
-            const retrievedData = loadPersonalData();
-
-            // Create system prompt with retrieved personal data
-            const systemPrompt = createSystemPrompt(styleSettings, mode, chatterName, retrievedData);
+            // Create system prompt with extracted personal data
+            const systemPrompt = createSystemPrompt(styleSettings, mode, chatterName, personalData);
 
             // Call the OpenAI API to generate a response
             const completion = await openai.chat.completions.create({
@@ -349,8 +282,21 @@ async function main() {
             const completionText = completion.choices[0].message.content.trim();
             console.log(colors.green('You: ') + completionText);
 
+            // Prepare output data
+            const outputTimestamp = new Date().toISOString();
+            const outputData = {
+                transcript: completionText,
+                timestamp: outputTimestamp
+            };
+
+            // Prepare input data for logging
+            const inputDataForLog = {
+                transcript: transcript,
+                timestamp: inputTimestamp
+            };
+
             // Save the chatbot response to both .txt and .json files, using the current name
-            appendToFile(completionText, chatterName);
+            appendToFile(inputDataForLog, outputData);
 
         } catch (error) {
             // Error Handling
@@ -364,7 +310,7 @@ async function main() {
         }
     }
 
-    // Set up an interval to check the JSON file every 1 second
+    // Set up an interval to check the JSON file every 3 seconds
     setInterval(checkAndProcessFile, 3000);
 }
 
