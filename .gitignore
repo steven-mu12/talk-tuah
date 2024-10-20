@@ -4,3 +4,6 @@ firmware/build/
 .venv
 tmpdir
 venv
+
+# Node.js dependencies
+node_modules/
