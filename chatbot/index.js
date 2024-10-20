@@ -42,22 +42,20 @@ if (!existsSync(personalDataFilePath)) {
     console.log(colors.yellow('Initialized personalData.json'));
 }
 
-// Function to append the response to both .txt and .json files
-function appendToFile(responseText, currentName) {
-    const textFileName = 'message.txt'; // Static name for text log
+// Function to append both input and output to the JSON log
+function appendToFile(inputData, outputData) {
     const jsonFileName = 'message.json'; // Static name for JSON log
-
-    const textFilePath = path.join(LOG_DIRECTORY, textFileName);
     const jsonFilePath = path.join(LOG_DIRECTORY, jsonFileName);
 
-    // Append response to message.txt
-    appendFileSync(textFilePath, `${responseText}\n`, { flag: 'a' });
-
-    // Create a JSON object with the name and response
-    const logEntry = {
-        name: currentName,
-        message: responseText,
-        timestamp: new Date().toISOString()
+    // Create a log entry with 'in' and 'out' sections
+    const logEntry = { in: {
+            transcript: inputData.transcript,
+            timestamp: inputData.timestamp
+        },
+        out: {
+            transcript: outputData.transcript,
+            timestamp: outputData.timestamp
+        }
     };
 
     // Read the current contents of message.json (or initialize an empty array if file doesn't exist)
@@ -77,6 +75,13 @@ function appendToFile(responseText, currentName) {
     logData.push(logEntry);
 
     writeFileSync(jsonFilePath, JSON.stringify(logData, null, 2), { flag: 'w' });
+
+    // Continue appending only the output transcript to message.txt
+    const textFileName = 'message.txt'; // Static name for text log
+    const textFilePath = path.join(LOG_DIRECTORY, textFileName);
+
+    const textLogEntry = `${outputData.transcript}\n`;
+    appendFileSync(textFilePath, textLogEntry, { flag: 'a' });
 }
 
 // Function to determine or update the name of the chatter based on input
