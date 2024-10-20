@@ -17,7 +17,7 @@ def chain_execute():
         prompting_process.wait()  # Wait for prompt process to finish
 
         # run display
-        display_process = subprocess.Popen(["python3", "oled.py"],
+        display_process = subprocess.Popen(["python3", "oled_display.py", "TAKE STUFF FROM PROMPTING"],
                                             cwd="/../firmware/drivers/oled/")
         display_process.wait()  # Wait for display process to finish
 
