@@ -6,6 +6,46 @@ const ProfileDetails = () => {
     const [name, setName] = useState("");
     const [topics, setTopics] = useState("");
 
+     useEffect(() => {
+    const debounceTimeout = setTimeout(() => {
+      if (name && topics) {
+        const uploadJsonData = async () => {
+          const jsonData = {
+            name: name,
+            topics: topics,
+          };
+
+          try {
+            const response = await fetch(
+              'https://9e44-199-115-241-221.ngrok-free.app/uploadjson',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonData),
+              }
+            );
+
+            const result = await response.json();
+            if (response.ok) {
+              console.log('Success:', result.message);
+            } else {
+              console.log('Error:', result.error);
+            }
+          } catch (error) {
+            console.error('Error uploading JSON:', error);
+          }
+        };
+
+        uploadJsonData();
+      }
+    }, 2000); // Set the timeout to 1 second
+
+    // Cleanup the timeout if name or topics change before the timeout completes
+    return () => clearTimeout(debounceTimeout);
+  }, [name, topics]);
+
     return (
         <TouchableWithoutFeedback style={styles.container} onPress={Keyboard.dismiss} accessible={false}>
             <View style={styles.container} >
@@ -37,7 +77,7 @@ const ProfileDetails = () => {
                     />
                 </View>
                 </View>
-                <BottomButton text={"Confirm Details!"} nav={"/voiceRecord"}/>
+                <BottomButton text={"Confirm Details!"} nav={"/voiceRecord"} passing={{}}/>
             </View>
         </TouchableWithoutFeedback>
     )
